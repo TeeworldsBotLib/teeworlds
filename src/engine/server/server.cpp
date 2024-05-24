@@ -281,10 +281,6 @@ void CServer::RegisterCommands()
 }
 
 
-int CServer::SnapNewID()
-{
-}
-
 void CServer::SnapFreeID(int ID)
 {
 }
