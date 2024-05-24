@@ -3,10 +3,7 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
-#include <base/tl/sorted_array.h>
-
 #include <engine/server.h>
-#include <engine/shared/memheap.h>
 
 class CSnapIDPool
 {
@@ -69,8 +66,6 @@ public:
 
 	void DemoRecorder_HandleAutoStart();
 	bool DemoRecorder_IsRecording();
-
-	int64 TickStartTime(int Tick);
 
 	int Init();
 

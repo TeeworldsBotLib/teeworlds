@@ -1,16 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/math.h>
-#include <base/system.h>
-
 #include <engine/console.h>
-#include <engine/engine.h>
-#include <engine/map.h>
 #include <engine/server.h>
-
-#include <engine/shared/compression.h>
-#include <engine/shared/filecollection.h>
 
 #include "server.h"
 
@@ -77,11 +69,6 @@ void CServer::SetClientScore(int ClientID, int Score)
 
 void CServer::Kick(int ClientID, const char *pReason)
 {
-}
-
-int64 CServer::TickStartTime(int Tick)
-{
-	return 0;
 }
 
 int CServer::Init()
@@ -326,34 +313,14 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
-#if defined(CONF_FAMILY_WINDOWS)
-	for(int i = 1; i < argc; i++)
-	{
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
-		{
-			dbg_console_hide();
-			break;
-		}
-	}
-#endif
-	if(secure_random_init() != 0)
-	{
-		dbg_msg("secure", "could not initialize secure RNG");
-		return -1;
-	}
-
 	signal(SIGINT, HandleSigIntTerm);
 	signal(SIGTERM, HandleSigIntTerm);
 
 	CServer *pServer = CreateServer();
 
 	// run the server
-	dbg_msg("server", "starting...");
 	int Ret = pServer->Run();
 
 
-	secure_random_uninit();
-	cmdline_free(argc, argv);
 	return Ret;
 }

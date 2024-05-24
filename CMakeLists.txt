@@ -408,51 +408,16 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
 ########################################################################
 
 # Sources
-set_src(BASE GLOB_RECURSE src/base
-  color.h
-  detect.h
-  hash.c
-  hash.h
-  hash_bundled.c
-  hash_ctxt.h
-  hash_libtomcrypt.c
-  hash_openssl.c
-  math.h
-  system.c
-  system.h
-  tl/algorithm.h
-  tl/allocator.h
-  tl/array.h
-  tl/range.h
-  tl/sorted_array.h
-  tl/string.h
-  tl/threading.h
-  vmath.h
-)
 set_src(ENGINE_INTERFACE GLOB src/engine
   console.h
-  engine.h
   kernel.h
   keys.h
-  map.h
   server.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
-  compression.cpp
-  compression.h
   console.h
-  engine.cpp
-  filecollection.h
-  huffman.cpp
-  huffman.h
-  jobs.cpp
-  jobs.h
-  jsonwriter.cpp
-  jsonwriter.h
   kernel.cpp
   mapchecker.h
-  memheap.cpp
-  memheap.h
 )
 set_src(GAME_SHARED GLOB src/game
   collision.cpp
@@ -526,7 +491,6 @@ add_library(twbl_bottick SHARED
   ${TWBL_SRC}
   ${ANTIBOT_SRC}
   ${GAME_GENERATED_SHARED}
-  src/base/hash_ctxt.h
   src/engine/external/md5/md5.h)
 
 # add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
