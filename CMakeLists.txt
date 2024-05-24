@@ -354,138 +354,6 @@ if(NOT CRYPTO_FOUND)
 endif()
 
 ########################################################################
-# DATA
-########################################################################
-
-set(EXPECTED_DATA
-  deadtee.png
-  editor/automap/desert_main.json
-  editor/automap/grass_doodads.json
-  editor/automap/grass_main.json
-  editor/automap/jungle_deathtiles.json
-  editor/automap/jungle_main.json
-  editor/automap/winter_main.json
-  editor/background.png
-  editor/checker.png
-  editor/cursor.png
-  editor/entities.png
-  emoticons.png
-  fonts/DejaVuSans.ttf
-  fonts/SourceHanSans.ttc
-  fonts/index.json
-  game.png
-  mapres/bg_cloud1.png
-  mapres/bg_cloud2.png
-  mapres/bg_cloud3.png
-  mapres/desert_doodads.png
-  mapres/desert_main.png
-  mapres/desert_mountains.png
-  mapres/desert_mountains2.png
-  mapres/desert_sun.png
-  mapres/easter.png
-  mapres/generic_deathtiles.png
-  mapres/generic_lamps.png
-  mapres/generic_shadows.png
-  mapres/generic_unhookable.png
-  mapres/grass_doodads.png
-  mapres/grass_main.png
-  mapres/jungle_background.png
-  mapres/jungle_deathtiles.png
-  mapres/jungle_doodads.png
-  mapres/jungle_main.png
-  mapres/jungle_midground.png
-  mapres/jungle_unhookables.png
-  mapres/light.png
-  mapres/moon.png
-  mapres/mountains.png
-  mapres/snow.png
-  mapres/stars.png
-  mapres/sun.png
-  mapres/winter_doodads.png
-  mapres/winter_main.png
-  mapres/winter_mountains.png
-  mapres/winter_mountains2.png
-  mapres/winter_mountains3.png
-  maps/ctf1.map
-  maps/ctf2.map
-  maps/ctf3.map
-  maps/ctf4.map
-  maps/ctf5.map
-  maps/ctf6.map
-  maps/ctf7.map
-  maps/ctf8.map
-  maps/dm1.map
-  maps/dm2.map
-  maps/dm3.map
-  maps/dm6.map
-  maps/dm7.map
-  maps/dm8.map
-  maps/dm9.map
-  maps/license.txt
-  maps/lms1.map
-  maps/readme.txt
-  particles.png
-  race_flag.png
-  ui/blob.png
-  ui/console.png
-  ui/console_bar.png
-  ui/debug_font.png
-  ui/demo_buttons.png
-  ui/file_icons.png
-  ui/gametypes/ctf.png
-  ui/gametypes/dm.png
-  ui/gametypes/lms.png
-  ui/gametypes/lts.png
-  ui/gametypes/mod.png
-  ui/gametypes/race.png
-  ui/gametypes/tdm.png
-  ui/gui_buttons.png
-  ui/gui_cursor.png
-  ui/gui_icons.png
-  ui/gui_logo.png
-  ui/icons/arrows.png
-  ui/icons/browse.png
-  ui/icons/browser.png
-  ui/icons/chat_whisper.png
-  ui/icons/friend.png
-  ui/icons/level.png
-  ui/icons/menu.png
-  ui/icons/network.png
-  ui/icons/sidebar.png
-  ui/icons/timer_clock.png
-  ui/icons/tools.png
-  ui/menuimages/demos.png
-  ui/menuimages/editor.png
-  ui/menuimages/local_server.png
-  ui/menuimages/play_game.png
-  ui/menuimages/settings.png
-  ui/no_skinpart.png
-  ui/sound_icons.png
-  ui/themes/auto.png
-  ui/themes/heavens.png
-  ui/themes/heavens_day.map
-  ui/themes/heavens_night.map
-  ui/themes/jungle.png
-  ui/themes/jungle_day.map
-  ui/themes/jungle_night.map
-  ui/themes/none.png
-  ui/themes/winter.png
-  ui/themes/winter_day.map
-  ui/themes/winter_night.map
-)
-
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/maps/dm1.map)
-  message(WARNING "Missing datasrc/maps submodule. Please download a source release or update your git submodules with `git submodule update --init`")
-  foreach(item ${EXPECTED_DATA})
-    if(item MATCHES "^maps/")
-      list(REMOVE_ITEM EXPECTED_DATA ${item})
-    endif()
-  endforeach()
-endif()
-
-set_glob(DATA GLOB_RECURSE "json;map;png;rules;ttc;ttf;txt;wv" datasrc ${EXPECTED_DATA})
-
-########################################################################
 # COPY DATA AND DLLS
 ########################################################################
 
@@ -505,19 +373,6 @@ function(chash output_file)
     COMMAND ${Python3_EXECUTABLE} scripts/cmd5.py ${ARGN}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS scripts/cmd5.py ${ARGN}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
-endfunction()
-
-function(generate_source output_file script_parameter)
-  add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS
-      datasrc/compile.py
-      datasrc/content.py
-      datasrc/datatypes.py
-      datasrc/network.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
@@ -546,10 +401,6 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
 )
-generate_source("src/generated/client_data.cpp" "client_content_source")
-generate_source("src/generated/client_data.h" "client_content_header")
-generate_source("src/generated/protocol.cpp" "network_source")
-generate_source("src/generated/protocol.h" "network_header")
 
 
 ########################################################################
