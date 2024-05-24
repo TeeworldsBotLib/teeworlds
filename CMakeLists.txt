@@ -378,48 +378,6 @@ set(EXPECTED_DATA
   fonts/SourceHanSans.ttc
   fonts/index.json
   game.png
-  languages/belarusian.json
-  languages/bosnian.json
-  languages/brazilian_portuguese.json
-  languages/breton.json
-  languages/bulgarian.json
-  languages/catalan.json
-  languages/chuvash.json
-  languages/czech.json
-  languages/danish.json
-  languages/dutch.json
-  languages/esperanto.json
-  languages/estonian.json
-  languages/finnish.json
-  languages/french.json
-  languages/gaelic_scottish.json
-  languages/galician.json
-  languages/german.json
-  languages/greek.json
-  languages/hungarian.json
-  languages/index.json
-  languages/irish.json
-  languages/italian.json
-  languages/japanese.json
-  languages/korean.json
-  languages/kyrgyz.json
-  languages/license.txt
-  languages/lithuanian.json
-  languages/norwegian.json
-  languages/polish.json
-  languages/portuguese.json
-  languages/readme.txt
-  languages/romanian.json
-  languages/russian.json
-  languages/serbian.json
-  languages/simplified_chinese.json
-  languages/slovak.json
-  languages/slovenian.json
-  languages/spanish.json
-  languages/swedish.json
-  languages/traditional_chinese.json
-  languages/turkish.json
-  languages/ukrainian.json
   mapres/bg_cloud1.png
   mapres/bg_cloud2.png
   mapres/bg_cloud3.png
@@ -519,15 +477,6 @@ set(EXPECTED_DATA
   ui/themes/winter_day.map
   ui/themes/winter_night.map
 )
-
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/languages/index.json)
-  message(WARNING "Missing datasrc/languages submodule. Please download a source release or update your git submodules with `git submodule update --init`")
-  foreach(item ${EXPECTED_DATA})
-    if(item MATCHES "^languages/")
-      list(REMOVE_ITEM EXPECTED_DATA ${item})
-    endif()
-  endforeach()
-endif()
 
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/maps/dm1.map)
   message(WARNING "Missing datasrc/maps submodule. Please download a source release or update your git submodules with `git submodule update --init`")
@@ -663,7 +612,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   masterserver.h
   message.h
   server.h
-  serverbrowser.h
   sound.h
   storage.h
   textrender.h
@@ -785,18 +733,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/ctf.cpp
-  gamemodes/ctf.h
-  gamemodes/dm.cpp
-  gamemodes/dm.h
-  gamemodes/lms.cpp
-  gamemodes/lms.h
-  gamemodes/lts.cpp
-  gamemodes/lts.h
-  gamemodes/mod.cpp
-  gamemodes/mod.h
-  gamemodes/tdm.cpp
-  gamemodes/tdm.h
   gameworld.cpp
   gameworld.h
   player.cpp

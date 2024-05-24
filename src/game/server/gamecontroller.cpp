@@ -38,7 +38,6 @@ IGameController::IGameController(CGameContext *pGameServer)
 
 	// info
 	m_GameFlags = 0;
-	m_pGameType = "unknown";
 	m_GameInfo.m_MatchCurrent = m_MatchCount+1;
 	m_GameInfo.m_MatchNum = (str_length(Config()->m_SvMaprotation) && Config()->m_SvMatchesPerMap) ? Config()->m_SvMatchesPerMap : 0;
 	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
@@ -628,243 +627,32 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 
 void IGameController::StartMatch()
 {
-	ResetGame();
-
-	m_RoundCount = 0;
-	m_aTeamscore[TEAM_RED] = 0;
-	m_aTeamscore[TEAM_BLUE] = 0;
-
-	// start countdown if there're enough players, otherwise do warmup till there're
-	if(HasEnoughPlayers())
-		SetGameState(IGS_START_COUNTDOWN);
-	else
-		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
-
-	Server()->DemoRecorder_HandleAutoStart();
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags&GAMEFLAG_TEAMS);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 }
 
 void IGameController::StartRound()
 {
-	ResetGame();
-
-	++m_RoundCount;
-
-	// start countdown if there're enough players, otherwise abort to warmup
-	if(HasEnoughPlayers())
-		SetGameState(IGS_START_COUNTDOWN);
-	else
-		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 }
 
 void IGameController::SwapTeamscore()
 {
-	if(!IsTeamplay())
-		return;
-
-	int Score = m_aTeamscore[TEAM_RED];
-	m_aTeamscore[TEAM_RED] = m_aTeamscore[TEAM_BLUE];
-	m_aTeamscore[TEAM_BLUE] = Score;
 }
 
 // general
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData)));
-	if(!pGameData)
-		return;
-
-	pGameData->m_GameStartTick = m_GameStartTick;
-	pGameData->m_GameStateFlags = 0;
-	pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
-	switch(m_GameState)
-	{
-	case IGS_WARMUP_GAME:
-	case IGS_WARMUP_USER:
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_WARMUP;
-		if(m_GameStateTimer != TIMER_INFINITE)
-			pGameData->m_GameStateEndTick = Server()->Tick()+m_GameStateTimer;
-		break;
-	case IGS_START_COUNTDOWN:
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_STARTCOUNTDOWN|GAMESTATEFLAG_PAUSED;
-		if(m_GameStateTimer != TIMER_INFINITE)
-			pGameData->m_GameStateEndTick = Server()->Tick()+m_GameStateTimer;
-		break;
-	case IGS_GAME_PAUSED:
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-		if(m_GameStateTimer != TIMER_INFINITE)
-			pGameData->m_GameStateEndTick = Server()->Tick()+m_GameStateTimer;
-		break;
-	case IGS_END_ROUND:
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_ROUNDOVER;
-		pGameData->m_GameStateEndTick = Server()->Tick()-m_GameStartTick-TIMER_END/2*Server()->TickSpeed()+m_GameStateTimer;
-		break;
-	case IGS_END_MATCH:
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
-		pGameData->m_GameStateEndTick = Server()->Tick()-m_GameStartTick-TIMER_END*Server()->TickSpeed()+m_GameStateTimer;
-		break;
-	case IGS_GAME_RUNNING:
-		// not effected
-		break;
-	}
-	if(m_SuddenDeath)
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
-
-	if(IsTeamplay())
-	{
-		CNetObj_GameDataTeam *pGameDataTeam = static_cast<CNetObj_GameDataTeam *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATATEAM, 0, sizeof(CNetObj_GameDataTeam)));
-		if(!pGameDataTeam)
-			return;
-
-		pGameDataTeam->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
-		pGameDataTeam->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
-	}
-
-	// demo recording
-	if(SnappingClient == -1)
-	{
-		CNetObj_De_GameInfo *pGameInfo = static_cast<CNetObj_De_GameInfo *>(Server()->SnapNewItem(NETOBJTYPE_DE_GAMEINFO, 0, sizeof(CNetObj_De_GameInfo)));
-		if(!pGameInfo)
-			return;
-
-		pGameInfo->m_GameFlags = m_GameFlags;
-		pGameInfo->m_ScoreLimit = m_GameInfo.m_ScoreLimit;
-		pGameInfo->m_TimeLimit = m_GameInfo.m_TimeLimit;
-		pGameInfo->m_MatchNum = m_GameInfo.m_MatchNum;
-		pGameInfo->m_MatchCurrent = m_GameInfo.m_MatchCurrent;
-	}
 }
 
 void IGameController::Tick()
 {
-	// handle game states
-	if(m_GameState != IGS_GAME_RUNNING)
-	{
-		if(m_GameStateTimer > 0)
-			--m_GameStateTimer;
-
-		if(m_GameStateTimer == 0)
-		{
-			// timer fires
-			switch(m_GameState)
-			{
-			case IGS_WARMUP_USER:
-				// end warmup
-				SetGameState(IGS_WARMUP_USER, 0);
-				break;
-			case IGS_START_COUNTDOWN:
-				// unpause the game
-				SetGameState(IGS_GAME_RUNNING);
-				break;
-			case IGS_GAME_PAUSED:
-				// end pause
-				SetGameState(IGS_GAME_PAUSED, 0);
-				break;
-			case IGS_END_ROUND:
-				StartRound();
-				break;
-			case IGS_END_MATCH:
-				// start next match
-				if(m_MatchCount >= m_GameInfo.m_MatchNum-1)
-					CycleMap();
-
-				if(Config()->m_SvMatchSwap)
-					GameServer()->SwapTeams();
-				m_MatchCount++;
-				StartMatch();
-				break;
-			case IGS_WARMUP_GAME:
-			case IGS_GAME_RUNNING:
-				// not effected
-				break;
-			}
-		}
-		else
-		{
-			// timer still running
-			switch(m_GameState)
- 			{
-			case IGS_WARMUP_USER:
-				// check if player ready mode was disabled and it waits that all players are ready -> end warmup
-				if(!Config()->m_SvPlayerReadyMode && m_GameStateTimer == TIMER_INFINITE)
-					SetGameState(IGS_WARMUP_USER, 0);
-				break;
-			case IGS_START_COUNTDOWN:
-			case IGS_GAME_PAUSED:
-				// freeze the game
-				++m_GameStartTick;
-				break;
-			case IGS_WARMUP_GAME:
-			case IGS_GAME_RUNNING:
-			case IGS_END_MATCH:
-			case IGS_END_ROUND:
-				// not effected
-				break;
- 			}
-		}
-	}
-
-	// do team-balancing (skip this in survival, done there when a round starts)
-	if(IsTeamplay() && !(m_GameFlags&GAMEFLAG_SURVIVAL))
-	{
-		switch(m_UnbalancedTick)
-		{
-		case TBALANCE_CHECK:
-			CheckTeamBalance();
-			break;
-		case TBALANCE_OK:
-			break;
-		default:
-			if(Server()->Tick() > m_UnbalancedTick+Config()->m_SvTeambalanceTime*Server()->TickSpeed()*60)
-				DoTeamBalance();
-		}
-	}
-
-	// check for inactive players
-	DoActivityCheck();
-
-	// win check
-	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
-	{
-		if(m_GameFlags&GAMEFLAG_SURVIVAL)
-			DoWincheckRound();
-		else
-			DoWincheckMatch();
-	}
 }
 
 // info
 void IGameController::CheckGameInfo()
 {
-	int MatchNum = (str_length(Config()->m_SvMaprotation) && Config()->m_SvMatchesPerMap) ? Config()->m_SvMatchesPerMap : 0;
-	if(MatchNum == 0)
-		m_MatchCount = 0;
-	bool GameInfoChanged = (m_GameInfo.m_MatchCurrent != m_MatchCount + 1) || (m_GameInfo.m_MatchNum != MatchNum) ||
-		(m_GameInfo.m_ScoreLimit != Config()->m_SvScorelimit) || (m_GameInfo.m_TimeLimit != Config()->m_SvTimelimit);
-	m_GameInfo.m_MatchCurrent = m_MatchCount + 1;
-	m_GameInfo.m_MatchNum = MatchNum;
-	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
-	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
-	if(GameInfoChanged)
-		UpdateGameInfo(-1);
 }
 
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 {
-	if(ClientID1 == ClientID2)
-		return false;
-
-	if(IsTeamplay())
-	{
-		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
-			return false;
-
-		if(!Config()->m_SvTeamdamage && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
-			return true;
-	}
-
 	return false;
 }
 
@@ -885,32 +673,6 @@ bool IGameController::IsTeamChangeAllowed() const
 
 void IGameController::UpdateGameInfo(int ClientID)
 {
-	CNetMsg_Sv_GameInfo GameInfoMsg;
-	GameInfoMsg.m_GameFlags = m_GameFlags;
-	GameInfoMsg.m_ScoreLimit = m_GameInfo.m_ScoreLimit;
-	GameInfoMsg.m_TimeLimit = m_GameInfo.m_TimeLimit;
-	GameInfoMsg.m_MatchNum = m_GameInfo.m_MatchNum;
-	GameInfoMsg.m_MatchCurrent = m_GameInfo.m_MatchCurrent;
-
-	CNetMsg_Sv_GameInfo GameInfoMsgNoRace = GameInfoMsg;
-	GameInfoMsgNoRace.m_GameFlags &= ~GAMEFLAG_RACE;
-
-	if(ClientID == -1)
-	{
-		for(int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if(!GameServer()->m_apPlayers[i] || !Server()->ClientIngame(i))
-				continue;
-
-			CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(i) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
-			Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		}
-	}
-	else
-	{
-		CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(ClientID) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
-		Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-	}
 }
 
 // map
@@ -918,115 +680,16 @@ static bool IsSeparator(char c) { return c == ';' || c == ' ' || c == ',' || c =
 
 void IGameController::ChangeMap(const char *pToMap)
 {
-	str_copy(m_aMapWish, pToMap, sizeof(m_aMapWish));
-
-	m_MatchCount = m_GameInfo.m_MatchNum-1;
-	SetGameState(IGS_GAME_RUNNING);
-	EndMatch();
 }
 
 void IGameController::CycleMap()
 {
-	if(m_aMapWish[0] != 0)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "rotating map to %s", m_aMapWish);
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-		Server()->ChangeMap(m_aMapWish);
-
-		m_aMapWish[0] = 0;
-		m_MatchCount = 0;
-		return;
-	}
-	if(!str_length(Config()->m_SvMaprotation))
-		return;
-
-	// handle maprotation
-	const char *pMapRotation = Config()->m_SvMaprotation;
-	const char *pCurrentMap = Config()->m_SvMap;
-
-	int CurrentMapLen = str_length(pCurrentMap);
-	const char *pNextMap = pMapRotation;
-	while(*pNextMap)
-	{
-		int WordLen = 0;
-		while(pNextMap[WordLen] && !IsSeparator(pNextMap[WordLen]))
-			WordLen++;
-
-		if(WordLen == CurrentMapLen && str_comp_num(pNextMap, pCurrentMap, CurrentMapLen) == 0)
-		{
-			// map found
-			pNextMap += CurrentMapLen;
-			while(*pNextMap && IsSeparator(*pNextMap))
-				pNextMap++;
-
-			break;
-		}
-
-		pNextMap++;
-	}
-
-	// restart rotation
-	if(pNextMap[0] == 0)
-		pNextMap = pMapRotation;
-
-	// cut out the next map
-	char aBuf[512] = {0};
-	for(int i = 0; i < 511; i++)
-	{
-		aBuf[i] = pNextMap[i];
-		if(IsSeparator(pNextMap[i]) || pNextMap[i] == 0)
-		{
-			aBuf[i] = 0;
-			break;
-		}
-	}
-
-	// skip spaces
-	int i = 0;
-	while(IsSeparator(aBuf[i]))
-		i++;
-
-	m_MatchCount = 0;
-
-	char aBufMsg[256];
-	str_format(aBufMsg, sizeof(aBufMsg), "rotating map to %s", &aBuf[i]);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-	Server()->ChangeMap(&aBuf[i]);
 }
 
 // spawn
 bool IGameController::CanSpawn(int Team, vec2 *pOutPos) const
 {
-	// spectators can't spawn
-	if(Team == TEAM_SPECTATORS || GameServer()->m_World.m_Paused || GameServer()->m_World.m_ResetRequested)
-		return false;
-
-	CSpawnEval Eval;
-	Eval.m_RandomSpawn = IsSurvival();
-
-	if(IsTeamplay())
-	{
-		Eval.m_FriendlyTeam = Team;
-
-		// first try own team spawn, then normal spawn and then enemy
-		EvaluateSpawnType(&Eval, 1+(Team&1));
-		if(!Eval.m_Got)
-		{
-			EvaluateSpawnType(&Eval, 0);
-			if(!Eval.m_Got)
-				EvaluateSpawnType(&Eval, 1+((Team+1)&1));
-		}
-	}
-	else
-	{
-		EvaluateSpawnType(&Eval, 0);
-		EvaluateSpawnType(&Eval, 1);
-		EvaluateSpawnType(&Eval, 2);
-	}
-
-	*pOutPos = Eval.m_Pos;
-	return Eval.m_Got;
+	return false;
 }
 
 float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos) const

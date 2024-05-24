@@ -191,7 +191,6 @@ public:
 	virtual bool IsClientPlayer(int ClientID) const;
 	virtual bool IsClientSpectator(int ClientID) const;
 
-	virtual const char *GameType() const;
 	virtual const char *Version() const;
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionHashUsed() const;

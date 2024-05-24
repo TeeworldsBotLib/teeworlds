@@ -113,7 +113,6 @@ protected:
 
 	// info
 	int m_GameFlags;
-	const char *m_pGameType;
 	struct CGameInfo
 	{
 		int m_MatchCurrent;
@@ -210,7 +209,6 @@ public:
 	bool IsTeamplay() const { return m_GameFlags&GAMEFLAG_TEAMS; }
 	bool IsSurvival() const { return m_GameFlags&GAMEFLAG_SURVIVAL; }
 
-	const char *GetGameType() const { return m_pGameType; }
 
 	// map
 	void ChangeMap(const char *pToMap);
