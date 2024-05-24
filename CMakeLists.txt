@@ -546,18 +546,10 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
 )
-chash("src/generated/nethash.cpp"
-  "src/engine/shared/protocol.h"
-  "src/game/tuning.h"
-  "src/game/gamecore.cpp"
-  "${PROJECT_BINARY_DIR}/src/generated/protocol.h"
-)
 generate_source("src/generated/client_data.cpp" "client_content_source")
 generate_source("src/generated/client_data.h" "client_content_header")
 generate_source("src/generated/protocol.cpp" "network_source")
 generate_source("src/generated/protocol.h" "network_header")
-generate_source("src/generated/server_data.cpp" "server_content_source")
-generate_source("src/generated/server_data.h" "server_content_header")
 
 
 ########################################################################
@@ -587,95 +579,40 @@ set_src(BASE GLOB_RECURSE src/base
   vmath.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
-  client.h
-  config.h
   console.h
-  contacts.h
-  demo.h
-  editor.h
   engine.h
-  graphics.h
-  input.h
   kernel.h
   keys.h
   map.h
-  mapchecker.h
-  message.h
   server.h
-  sound.h
-  storage.h
-  textrender.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
   compression.h
-  config.cpp
-  config.h
-  config_variables.h
-  console.cpp
   console.h
-  datafile.cpp
-  datafile.h
-  demo.cpp
-  demo.h
-  econ.cpp
-  econ.h
   engine.cpp
-  filecollection.cpp
   filecollection.h
   huffman.cpp
   huffman.h
   jobs.cpp
   jobs.h
-  jsonparser.cpp
-  jsonparser.h
   jsonwriter.cpp
   jsonwriter.h
   kernel.cpp
-  linereader.cpp
-  linereader.h
-  map.cpp
-  mapchecker.cpp
   mapchecker.h
   memheap.cpp
   memheap.h
-  netban.cpp
-  netban.h
-  network.cpp
-  network.h
-  network_client.cpp
-  network_conn.cpp
-  network_console.cpp
-  network_console_conn.cpp
-  network_server.cpp
-  network_token.cpp
-  packer.cpp
-  packer.h
-  protocol.h
-  ringbuffer.cpp
-  ringbuffer.h
-  snapshot.cpp
-  snapshot.h
-  storage.cpp
 )
-set(ENGINE_GENERATED_SHARED src/generated/nethash.cpp src/generated/protocol.cpp src/generated/protocol.h)
 set_src(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
   commands.h
-  gamecore.cpp
-  gamecore.h
-  layers.cpp
-  layers.h
   mapitems.h
   tuning.h
-  variables.h
   version.h
-  voting.h
 )
 set(GAME_GENERATED_SHARED
   src/generated/git_revision.cpp
-  src/generated/nethash.cpp
   src/generated/protocol.h
 )
 
@@ -685,7 +622,7 @@ set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${CRYPTO_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
@@ -700,27 +637,6 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   register.h
   server.cpp
   server.h
-)
-set_src(GAME_SERVER GLOB_RECURSE src/game/server
-  alloc.h
-  entities/character.cpp
-  entities/character.h
-  entities/projectile.cpp
-  entities/projectile.h
-  entity.cpp
-  entity.h
-  eventhandler.cpp
-  eventhandler.h
-  gamecontext.cpp
-  gamecontext.h
-  gameworld.cpp
-  gameworld.h
-  player.cpp
-  player.h
-)
-set(GAME_GENERATED_SERVER
-  src/generated/server_data.cpp
-  src/generated/server_data.h
 )
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")

@@ -9,7 +9,6 @@
 #include <engine/kernel.h>
 
 #include <game/mapitems.h>
-#include <game/layers.h>
 #include <game/collision.h>
 
 CCollision::CCollision()

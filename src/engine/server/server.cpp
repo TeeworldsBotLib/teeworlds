@@ -4,25 +4,13 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
 
 #include <engine/shared/compression.h>
-#include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
-#include <engine/shared/demo.h>
-#include <engine/shared/econ.h>
 #include <engine/shared/filecollection.h>
-#include <engine/shared/mapchecker.h>
-#include <engine/shared/netban.h>
-#include <engine/shared/network.h>
-#include <engine/shared/packer.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/snapshot.h>
 
 #include "server.h"
 
@@ -54,68 +42,19 @@ void CSnapIDPool::Reset()
 
 void CSnapIDPool::RemoveFirstTimeout()
 {
-	int NextTimed = m_aIDs[m_FirstTimed].m_Next;
-
-	// add it to the free list
-	m_aIDs[m_FirstTimed].m_Next = m_FirstFree;
-	m_aIDs[m_FirstTimed].m_State = 0;
-	m_FirstFree = m_FirstTimed;
-
-	// remove it from the timed list
-	m_FirstTimed = NextTimed;
-	if(m_FirstTimed == -1)
-		m_LastTimed = -1;
-
-	m_Usage--;
 }
 
 int CSnapIDPool::NewID()
 {
-	int64 Now = time_get();
-
-	// process timed ids
-	while(m_FirstTimed != -1 && m_aIDs[m_FirstTimed].m_Timeout < Now)
-		RemoveFirstTimeout();
-
-	int ID = m_FirstFree;
-	dbg_assert(ID != -1, "id error");
-	if(ID == -1)
-		return ID;
-	m_FirstFree = m_aIDs[m_FirstFree].m_Next;
-	m_aIDs[ID].m_State = 1;
-	m_Usage++;
-	m_InUsage++;
-	return ID;
+	return 0;
 }
 
 void CSnapIDPool::TimeoutIDs()
 {
-	// process timed ids
-	while(m_FirstTimed != -1)
-		RemoveFirstTimeout();
 }
 
 void CSnapIDPool::FreeID(int ID)
 {
-	if(ID < 0)
-		return;
-	dbg_assert(m_aIDs[ID].m_State == 1, "id is not allocated");
-
-	m_InUsage--;
-	m_aIDs[ID].m_State = 2;
-	m_aIDs[ID].m_Timeout = time_get()+time_freq()*5;
-	m_aIDs[ID].m_Next = -1;
-
-	if(m_LastTimed != -1)
-	{
-		m_aIDs[m_LastTimed].m_Next = ID;
-		m_LastTimed = ID;
-	}
-	else
-	{
-		m_FirstTimed = ID;
-		m_LastTimed = ID;
-	}
 }
 
 
@@ -202,10 +141,6 @@ void CServer::InitRconPasswordIfUnset()
 {
 }
 
-int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
-{
-	return 0;
-}
 
 void CServer::DoSnapshot()
 {
@@ -402,17 +337,6 @@ int main(int argc, const char **argv)
 		}
 	}
 #endif
-
-	bool UseDefaultConfig = false;
-	for(int i = 1; i < argc; i++)
-	{
-		if(str_comp("-d", argv[i]) == 0 || str_comp("--default", argv[i]) == 0)
-		{
-			UseDefaultConfig = true;
-			break;
-		}
-	}
-
 	if(secure_random_init() != 0)
 	{
 		dbg_msg("secure", "could not initialize secure RNG");

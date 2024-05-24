@@ -3,7 +3,6 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 #include "kernel.h"
-#include "message.h"
 
 class IServer : public IInterface
 {
@@ -33,16 +32,6 @@ public:
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 	virtual int GetClientVersion(int ClientID) const = 0;
 
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
-
-	template<class T>
-	int SendPackMsg(T *pMsg, int Flags, int ClientID)
-	{
-		CMsgPacker Packer(pMsg->MsgID(), false);
-		if(pMsg->Pack(&Packer))
-			return -1;
-		return SendMsg(&Packer, Flags, ClientID);
-	}
 
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
@@ -83,8 +72,6 @@ public:
 	virtual void OnPreSnap() = 0;
 	virtual void OnSnap(int ClientID) = 0;
 	virtual void OnPostSnap() = 0;
-
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) = 0;
 
 	virtual void OnClientConnected(int ClientID, bool AsSpec) = 0;
 	virtual void OnClientEnter(int ClientID) = 0;
