@@ -6,3 +6,6 @@
 	path = datasrc/maps
 	url = https://github.com/teeworlds/teeworlds-maps.git
 	branch = master
+[submodule "src/external/TeeworldsBotLib"]
+	path = src/external/TeeworldsBotLib
+	url = git@github.com:TeeworldsBotLib/TeeworldsBotLib.git

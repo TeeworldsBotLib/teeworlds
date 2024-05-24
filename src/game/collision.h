@@ -12,10 +12,10 @@ class CCollision
 	int m_Height;
 	class CLayers *m_pLayers;
 
+public: // TODO: twbl moved the public
 	bool IsTile(int x, int y, int Flag=COLFLAG_SOLID) const;
 	int GetTile(int x, int y) const;
 
-public:
 	enum
 	{
 		COLFLAG_SOLID=1,

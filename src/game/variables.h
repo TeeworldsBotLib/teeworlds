@@ -144,10 +144,15 @@ MACRO_CONFIG_INT(SvVoteKickMin, sv_vote_kick_min, 0, 0, MAX_CLIENTS, CFGFLAG_SAV
 MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SAVE|CFGFLAG_SERVER, "The time to ban a player if kicked by vote. 0 makes it just use kick")
 
 // debug
-#ifdef CONF_DEBUG // this one can crash the server if not used correctly
-	MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "")
-#endif
+MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 1, 0, MAX_CLIENTS, CFGFLAG_SERVER, "")
 
 MACRO_CONFIG_INT(DbgFocus, dbg_focus, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 1, CFGFLAG_CLIENT, "")
+
+
+MACRO_CONFIG_STR(SvSoPath, sv_so_path, 256, "./libtwbl_bottick.so", CFGFLAG_SAVE | CFGFLAG_SERVER, "twbl test")
+MACRO_CONFIG_STR(SvTick, sv_tick, 256, "Sample", CFGFLAG_SAVE | CFGFLAG_SERVER, "twbl test")
+
 #endif
+
+

@@ -1641,6 +1641,74 @@ endif()
 # Libraries
 set(LIBS_SERVER ${LIBS})
 
+# **********************************
+# twbl start
+set(TWBL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/external/TeeworldsBotLib)
+add_subdirectory(${TWBL_ROOT})
+include_directories(${TWBL_ROOT}/src)
+FILE(GLOB TWBL_SRC
+  ${TWBL_ROOT}/src/shared/*.cpp
+  ${TWBL_ROOT}/src/shared/*.h
+  ${TWBL_ROOT}/src/bots/*.cpp
+  ${TWBL_ROOT}/src/bots/*.h
+)
+
+add_library(twbl_bottick_lite SHARED ${TWBL_SRC})
+set(SERVER_SRC ${SERVER_SRC} ${TWBL_SRC})
+# set(SERVER_SRC ${SERVER_SRC}
+#   ${TWBL_ROOT}/src/shared/hotreload.cpp
+#   ${TWBL_ROOT}/src/shared/hotreload.h
+#   ${TWBL_ROOT}/src/shared/types.h
+#   ${TWBL_ROOT}/src/bots/base.cpp
+#   ${TWBL_ROOT}/src/bots/base.h
+# )
+
+
+add_library(twbl_bottick SHARED
+  ${SERVER_SRC}
+  ${TWBL_SRC}
+  ${ANTIBOT_SRC}
+  ${GAME_GENERATED_SHARED}
+  src/base/hash_ctxt.h
+  src/engine/external/md5/md5.h)
+
+# add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
+target_link_libraries(twbl_bottick
+  PRIVATE
+  ${CRYPTO_LIBRARIES}
+  ${DEP_MD5_SRC}
+  PUBLIC
+  ssl
+)
+
+target_include_directories(twbl_bottick SYSTEM PRIVATE ${CRYPTO_INCLUDE_DIRS})
+target_compile_definitions(twbl_bottick PRIVATE TWBL_SHARED_OBJECT=1)
+
+target_include_directories(twbl_bottick PRIVATE src)
+target_include_directories(twbl_bottick PRIVATE ${PROJECT_BINARY_DIR}/src)
+target_include_directories(twbl_bottick PRIVATE src/rust-bridge)
+
+SET(LIBS_SERVER ${LIBS_SERVER} -rdynamic)
+
+target_link_libraries(twbl_bottick PUBLIC -rdynamic)
+target_link_libraries(twbl_bottick PUBLIC -fPIC)
+
+target_compile_options(twbl_bottick PUBLIC -fPIC)
+target_compile_options(twbl_bottick PUBLIC -fPIC)
+
+# target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
+# target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+# target_link_libraries(${target} -stdlib=libc++)
+# target_link_libraries(${target} -mmacosx-version-min=10.7)
+
+
+
+# set_own_rpath(game-server)
+
+# twbl end
+# **********************************
+
+
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})
 add_executable(${TARGET_SERVER}

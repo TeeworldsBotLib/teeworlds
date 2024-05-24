@@ -1656,7 +1656,6 @@ void CGameContext::OnInit()
 	if(Config()->m_SvMaxClients < Config()->m_SvPlayerSlots)
 		Config()->m_SvPlayerSlots = Config()->m_SvMaxClients;
 
-#ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MAX_CLIENTS-1
 	if(MAX_CLIENTS <= Config()->m_DbgDummies)
 		Config()->m_DbgDummies = MAX_CLIENTS;
@@ -1665,7 +1664,6 @@ void CGameContext::OnInit()
 		for(int i = 0; i < Config()->m_DbgDummies ; i++)
 			OnClientConnected(MAX_CLIENTS -i-1, true, false);
 	}
-#endif
 }
 
 void CGameContext::OnShutdown()

@@ -38,7 +38,7 @@ private:
 	/* State */
 	bool m_MarkedForDestroy;
 
-protected:
+public: // twbl hack to compile. this should be smoothed out at some point
 	/* State */
 
 	/*

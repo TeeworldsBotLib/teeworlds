@@ -8,8 +8,14 @@
 #include <game/server/player.h>
 
 #include "character.h"
+#include "base/system.h"
 #include "laser.h"
 #include "projectile.h"
+
+#include <bots/sample.h>
+#include <server/set_state.h>
+#include <shared/hotreload.h>
+#include <shared/types.h>
 
 //input count
 struct CInputCount
@@ -524,6 +530,50 @@ void CCharacter::ResetInput()
 
 void CCharacter::Tick()
 {
+	CServerBotStateOut Bot;
+	CServerBotStateIn State;
+
+	TWBL::SetState(this, &State);
+	State.m_pCollision = GameServer()->Collision();
+
+	FTwbl_BotTick BotTick;
+	void *pHandle = TWBL::LoadTick(Config()->m_SvSoPath, Config()->m_SvTick, &BotTick);
+
+	//  If filename is NULL, then the returned handle is for the main progra
+
+	if(pHandle)
+	{
+		BotTick(&State, &Bot);
+		int Err = dlclose(pHandle);
+		if(Err)
+		{
+			dbg_msg("twbl", "failed to close err=%d", Err);
+		}
+		dlerror();
+	}
+	// else
+	// 	Twbl_SampleTick(&State, &Bot);
+
+	// void *pMain = dlopen(NULL, RTLD_LAZY);
+	// if(pMain && pMain == pHandle)
+	// {
+	// 	dbg_msg("twbl", "woah there! pHandle == pMain thats not loading external stuff");
+	// }
+	// dlclose(pMain);
+
+	// dbg_msg("srv", "%s %s", g_Config.m_SvSoPath, g_Config.m_SvTick);
+	// dbg_msg("srv", "f=%s handle=%p main=%p callback=%p native=%p", g_Config.m_SvTick, pHandle, pMain, BotTick, Twbl_SampleTick);
+	// dbg_msg("srv", "'%s' handle=%p callback=%p native=%p", g_Config.m_SvTick, pHandle, BotTick, Twbl_SampleTick);
+
+	dbg_msg("srv", "%s '%s' fp=%p static=%p", Config()->m_SvSoPath, Config()->m_SvTick, BotTick, Twbl_SampleTick);
+	BotTick = nullptr;
+
+	m_Input.m_Direction = Bot.m_Direction;
+
+
+
+	dbg_msg("foo", "bar");
+
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true);
 
