@@ -268,9 +268,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 find_package(ZLIB)
 find_package(Crypto)
-find_package(Freetype)
 find_package(Git)
-find_package(SDL2)
 find_package(Threads)
 find_package(Wavpack)
 
@@ -315,13 +313,11 @@ endfunction()
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
-show_dependency_status("Freetype" FREETYPE)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Python3" Python3)
-show_dependency_status("SDL2" SDL2)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
 
@@ -499,11 +495,6 @@ foreach(datafile ${DATA})
   file(MAKE_DIRECTORY ${DESTINATION})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
-set(COPY_FILES
-  ${FREETYPE_COPY_FILES}
-  ${SDL2_COPY_FILES}
-)
-file(COPY ${COPY_FILES} DESTINATION .)
 
 ########################################################################
 # CODE GENERATION
