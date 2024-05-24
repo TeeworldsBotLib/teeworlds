@@ -600,7 +600,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   keys.h
   map.h
   mapchecker.h
-  masterserver.h
   message.h
   server.h
   sound.h
@@ -638,7 +637,6 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   map.cpp
   mapchecker.cpp
   mapchecker.h
-  masterserver.cpp
   memheap.cpp
   memheap.h
   netban.cpp
@@ -699,7 +697,6 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 # Sources
 set_src(ENGINE_SERVER GLOB src/engine/server
-  register.cpp
   register.h
   server.cpp
   server.h
@@ -708,12 +705,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
   entities/character.cpp
   entities/character.h
-  entities/flag.cpp
-  entities/flag.h
-  entities/laser.cpp
-  entities/laser.h
-  entities/pickup.cpp
-  entities/pickup.h
   entities/projectile.cpp
   entities/projectile.h
   entity.cpp
@@ -722,8 +713,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   eventhandler.h
   gamecontext.cpp
   gamecontext.h
-  gamecontroller.cpp
-  gamecontroller.h
   gameworld.cpp
   gameworld.h
   player.cpp
