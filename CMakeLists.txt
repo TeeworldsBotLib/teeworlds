@@ -464,7 +464,6 @@ set_src(GAME_SHARED GLOB src/game
 )
 set(GAME_GENERATED_SHARED
   src/generated/git_revision.cpp
-  src/generated/protocol.h
 )
 
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
