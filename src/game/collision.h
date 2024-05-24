@@ -10,7 +10,6 @@ class CCollision
 	struct CTile *m_pTiles;
 	int m_Width;
 	int m_Height;
-	class CLayers *m_pLayers;
 
 public: // TODO: twbl moved the public
 	bool IsTile(int x, int y, int Flag=COLFLAG_SOLID) const;
@@ -24,7 +23,7 @@ public: // TODO: twbl moved the public
 	};
 
 	CCollision();
-	void Init(class CLayers *pLayers);
+	void Init();
 	bool CheckPoint(float x, float y, int Flag=COLFLAG_SOLID) const { return IsTile(round_to_int(x), round_to_int(y), Flag); }
 	bool CheckPoint(vec2 Pos, int Flag=COLFLAG_SOLID) const { return CheckPoint(Pos.x, Pos.y, Flag); }
 	int GetCollisionAt(float x, float y) const { return GetTile(round_to_int(x), round_to_int(y)); }

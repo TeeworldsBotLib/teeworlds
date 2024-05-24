@@ -17,15 +17,13 @@ CCollision::CCollision()
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
-	m_pLayers = 0;
 }
 
-void CCollision::Init(class CLayers *pLayers)
+void CCollision::Init()
 {
-	m_pLayers = pLayers;
-	m_Width = m_pLayers->GameLayer()->m_Width;
-	m_Height = m_pLayers->GameLayer()->m_Height;
-	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
+	m_Width = 100;
+	m_Height = 100;
+	m_pTiles = (CTile *)malloc(sizeof(CTile) * m_Width * m_Height);
 
 	for(int i = 0; i < m_Width*m_Height; i++)
 	{
