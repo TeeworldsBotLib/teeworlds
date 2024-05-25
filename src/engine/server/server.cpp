@@ -194,32 +194,6 @@ void CServer::InitInterfaces(IKernel *pKernel)
 #include <shared/types.h>
 #include <cstdio>
 
-void *LoadTick(FTwbl_BotTick *pfnBotTick)
-{
-	*pfnBotTick = nullptr;
-
-	dlerror(); // clear old error
-	void *pHandle = dlopen("./libtwbl_bottick.so", RTLD_NOW | RTLD_GLOBAL);
-	const char *pError = dlerror();
-	if(!pHandle || pError)
-	{
-		fprintf(stderr, "dlopen failed: %s\n", pError);
-		if(pHandle)
-			dlclose(pHandle);
-		return nullptr;
-	}
-
-	*pfnBotTick = (FTwbl_BotTick)dlsym(pHandle, "Twbl_SampleTick");
-	pError = dlerror();
-	if(!*pfnBotTick || pError)
-	{
-		fprintf(stderr, "dlsym failed: %s\n", pError);
-		if(pHandle)
-			dlclose(pHandle);
-		return nullptr;
-	}
-	return pHandle;
-}
 
 void Sleep(int Miliseconds)
 {
@@ -237,7 +211,7 @@ int CServer::Run()
 	while(true)
 	{
 		FTwbl_BotTick pfnBotTick;
-		void *pHandle = LoadTick(&pfnBotTick);
+		void *pHandle = TWBL::LoadTick("./libtwbl_bottick.so", "Sample", &pfnBotTick);
 		CServerBotStateIn State;
 		State.m_pCollision = &Col;
 		CServerBotStateOut Bot;

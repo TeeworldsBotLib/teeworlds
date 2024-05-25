@@ -469,13 +469,13 @@ FILE(GLOB TWBL_SRC
 )
 
 set(SERVER_SRC ${SERVER_SRC} ${TWBL_SRC})
-# set(SERVER_SRC ${SERVER_SRC}
-#   ${TWBL_ROOT}/src/shared/hotreload.cpp
-#   ${TWBL_ROOT}/src/shared/hotreload.h
-#   ${TWBL_ROOT}/src/shared/types.h
-#   ${TWBL_ROOT}/src/bots/base.cpp
-#   ${TWBL_ROOT}/src/bots/base.h
-# )
+set(SERVER_SRC ${SERVER_SRC}
+  ${TWBL_ROOT}/src/shared/hotreload.cpp
+  ${TWBL_ROOT}/src/shared/hotreload.h
+  ${TWBL_ROOT}/src/shared/types.h
+  ${TWBL_ROOT}/src/bots/base.cpp
+  ${TWBL_ROOT}/src/bots/base.h
+)
 
 
 add_library(twbl_bottick SHARED
