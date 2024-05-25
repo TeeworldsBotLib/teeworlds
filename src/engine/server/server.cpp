@@ -230,12 +230,16 @@ int CServer::Run()
 {
 	puts("starting server ...");
 
+
+	CCollision Col;
+	Col.Init();
+
 	while(true)
 	{
 		FTwbl_BotTick pfnBotTick;
 		void *pHandle = LoadTick(&pfnBotTick);
 		CServerBotStateIn State;
-		State.m_pCollision = nullptr;
+		State.m_pCollision = &Col;
 		CServerBotStateOut Bot;
 
 		if(pHandle)
